@@ -1,6 +1,6 @@
 import {Get, Controller } from '@nestjs/common';
 
-import { TagEntity } from './tag.entity';
+import { TagsRO } from './tag.interface';
 import { TagService } from './tag.service';
 
 import {
@@ -16,7 +16,7 @@ export class TagController {
   constructor(private readonly tagService: TagService) {}
 
   @Get()
-  async findAll(): Promise<TagEntity[]> {
+  async findAll(): Promise<TagsRO> {
     return await this.tagService.findAll();
   }
 
