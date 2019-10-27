@@ -89,12 +89,12 @@ export class ArticleService {
   }
 
   async findOne(where): Promise<ArticleRO> {
-    const article = await this.articleRepository.findOne(where);
+    const article = await this.articleRepository.findOne({...where, relations: ["author"]});
     return {article};
   }
 
   async addComment(slug: string, commentData): Promise<ArticleRO> {
-    let article = await this.articleRepository.findOne({slug});
+    let article = await this.articleRepository.findOne({slug, relations: ["author"]});
 
     const comment = new Comment();
     comment.body = commentData.body;
@@ -107,7 +107,7 @@ export class ArticleService {
   }
 
   async deleteComment(slug: string, id: string): Promise<ArticleRO> {
-    let article = await this.articleRepository.findOne({slug});
+    let article = await this.articleRepository.findOne({slug, relations: ["author"]});
 
     const comment = await this.commentRepository.findOne(id);
     const deleteIndex = article.comments.findIndex(_comment => _comment.id === comment.id);
@@ -124,7 +124,7 @@ export class ArticleService {
   }
 
   async favorite(id: number, slug: string): Promise<ArticleRO> {
-    let article = await this.articleRepository.findOne({slug});
+    let article = await this.articleRepository.findOne({slug, relations: ["author"]});
     const user = await this.userRepository.findOne(id);
 
     const isNewFavorite = user.favorites.findIndex(_article => _article.id === article.id) < 0;
@@ -140,7 +140,7 @@ export class ArticleService {
   }
 
   async unFavorite(id: number, slug: string): Promise<ArticleRO> {
-    let article = await this.articleRepository.findOne({slug});
+    let article = await this.articleRepository.findOne({slug, relations: ["author"]});
     const user = await this.userRepository.findOne(id);
 
     const deleteIndex = user.favorites.findIndex(_article => _article.id === article.id);
@@ -188,14 +188,14 @@ export class ArticleService {
   }
 
   async update(slug: string, articleData: any): Promise<ArticleRO> {
-    let toUpdate = await this.articleRepository.findOne({ slug: slug});
+    let toUpdate = await this.articleRepository.findOne({ slug, relations: ["author"]});
     let updated = Object.assign(toUpdate, articleData);
     const article = await this.articleRepository.save(updated);
     return {article};
   }
 
   async delete(slug: string): Promise<DeleteResult> {
-    return await this.articleRepository.delete({ slug: slug});
+    return await this.articleRepository.delete({ slug, relations: ["author"] });
   }
 
   slugify(title: string) {
