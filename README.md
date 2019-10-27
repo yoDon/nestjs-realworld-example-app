@@ -1,8 +1,6 @@
-# ![Node/Express/Mongoose Example App](project-logo.png)
+# ![NestJS](project-logo.png)
 
-[![Build Status](https://travis-ci.org/anishkny/node-express-realworld-example-app.svg?branch=master)](https://travis-ci.org/anishkny/node-express-realworld-example-app)
-
-> ### NestJS (Express + Mongoose) codebase containing real world examples (CRUD, auth, advanced patterns, etc) that adheres to the [RealWorld](https://github.com/gothinkster/realworld-example-apps) API spec.
+> ### NestJS codebase containing real world examples (CRUD, auth, advanced patterns, etc) that adheres to the [RealWorld](https://github.com/gothinkster/realworld-example-apps) API spec.
 
 
 ----------
@@ -10,14 +8,6 @@
 # Getting started
 
 ## Installation
-
-Clone the repository
-
-    git clone git@github.com:lujakob/nestjs-realworld-example-app.git
-
-Switch to the repo folder
-
-    cd nestjs-realworld-example-app
     
 Install dependencies
     
@@ -33,11 +23,9 @@ Copy config file and set JsonWebToken secret key
 
 The example codebase uses [Typeorm](http://typeorm.io/) with a mySQL database.
 
-Create a new mysql database with the name `nestjsrealworld` (or the name you specified in the ormconfig.json)
-
 Copy Typeorm config example file for database settings
 
-    cp ormconfig.json.example ``
+    cp ormconfig.json.example ormconfig.json
     
 Set mysql database settings in ormconfig.json
 
@@ -52,7 +40,7 @@ Set mysql database settings in ormconfig.json
       "synchronize": true
     }
     
-Start local mysql server and create new database 'nestjsrealworld'
+Start local mysql server and create a new database called nestjsrealworld (or the name you specified in the ormconfig.json)
 
 On application start, tables for all entities will be created.
 
@@ -80,16 +68,11 @@ More information regarding the project can be found here https://github.com/goth
 ## Start application
 
 - `npm start`
-- Test api with `http://localhost:3000/api/articles` in your favourite browser
+- Test api by browsing to `http://localhost:3000/api/articles`
+- View automatically generated swagger api docs by browsing to `http://localhost:3000/docs`
 
 ----------
 
 # Authentication
  
-This applications uses JSON Web Token (JWT) to handle authentication. The token is passed with each request using the `Authorization` header with `Token` scheme. The JWT authentication middleware handles the validation and authentication of the token. Please check the following sources to learn more about JWT.
-
-----------
- 
-# Swagger API docs
-
-This example repo uses the NestJS swagger module for API documentation. [NestJS Swagger](https://github.com/nestjs/swagger) - [www.swagger.io](https://swagger.io/)        
+This applications uses JSON Web Token (JWT) to handle authentication. The token is passed with each request using the `Authorization` header with `Token` scheme. The JWT authentication middleware handles the validation and authentication of the token.
