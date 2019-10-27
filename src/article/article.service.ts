@@ -59,6 +59,7 @@ export class ArticleService {
     }
 
     const articles = await qb.getMany();
+    this.protectAuthors(articles);
 
     return {articles, articlesCount};
   }
@@ -84,6 +85,7 @@ export class ArticleService {
     }
 
     const articles = await qb.getMany();
+    this.protectAuthors(articles);
 
     return {articles, articlesCount};
   }
@@ -220,5 +222,11 @@ export class ArticleService {
         delete article.author.email;
       }
     }
+  }
+
+  protectAuthors(articles:any[]) {
+    articles.forEach((article) => {
+      this.protectAuthor(article);
+    });
   }
 }
