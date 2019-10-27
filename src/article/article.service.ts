@@ -90,11 +90,13 @@ export class ArticleService {
 
   async findOne(where): Promise<ArticleRO> {
     const article = await this.articleRepository.findOne({...where, relations: ["author"]});
+    this.protectAuthor(article);
     return {article};
   }
 
   async addComment(slug: string, commentData): Promise<ArticleRO> {
     let article = await this.articleRepository.findOne({slug, relations: ["author"]});
+    this.protectAuthor(article);
 
     const comment = new Comment();
     comment.body = commentData.body;
@@ -108,6 +110,7 @@ export class ArticleService {
 
   async deleteComment(slug: string, id: string): Promise<ArticleRO> {
     let article = await this.articleRepository.findOne({slug, relations: ["author"]});
+    this.protectAuthor(article);
 
     const comment = await this.commentRepository.findOne(id);
     const deleteIndex = article.comments.findIndex(_comment => _comment.id === comment.id);
@@ -125,6 +128,7 @@ export class ArticleService {
 
   async favorite(id: number, slug: string): Promise<ArticleRO> {
     let article = await this.articleRepository.findOne({slug, relations: ["author"]});
+    this.protectAuthor(article);
     const user = await this.userRepository.findOne(id);
 
     const isNewFavorite = user.favorites.findIndex(_article => _article.id === article.id) < 0;
@@ -141,6 +145,7 @@ export class ArticleService {
 
   async unFavorite(id: number, slug: string): Promise<ArticleRO> {
     let article = await this.articleRepository.findOne({slug, relations: ["author"]});
+    this.protectAuthor(article);
     const user = await this.userRepository.findOne(id);
 
     const deleteIndex = user.favorites.findIndex(_article => _article.id === article.id);
@@ -159,6 +164,7 @@ export class ArticleService {
 
   async findComments(slug: string): Promise<CommentsRO> {
     const article = await this.articleRepository.findOne({slug});
+    this.protectAuthor(article);
     return {comments: article.comments};
   }
 
@@ -173,6 +179,7 @@ export class ArticleService {
     article.comments = [];
 
     const newArticle = await this.articleRepository.save(article);
+    this.protectAuthor(newArticle);
 
     const author = await this.userRepository.findOne({ where: { id: userId }, relations: ["articles"] });
 
@@ -192,14 +199,26 @@ export class ArticleService {
     let toUpdate = await this.articleRepository.findOne({ slug, relations: ["author"]});
     let updated = Object.assign(toUpdate, articleData);
     const article = await this.articleRepository.save(updated);
+    this.protectAuthor(article);
     return {article};
   }
 
   async delete(slug: string): Promise<DeleteResult> {
-    return await this.articleRepository.delete({ slug, relations: ["author"] });
+    return await this.articleRepository.delete({ slug });
   }
 
   slugify(title: string) {
     return slug(title, {lower: true}) + '-' + (Math.random() * Math.pow(36, 6) | 0).toString(36)
+  }
+
+  protectAuthor(article:any) {
+    if (article && article.author) {
+      if (article.author.password) {
+        delete article.author.password;
+      }
+      if (article.author.email) {
+        delete article.author.email;
+      }
+    }
   }
 }
