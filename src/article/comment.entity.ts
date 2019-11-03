@@ -13,8 +13,7 @@ export class Comment {
 
   @ManyToOne((type) => ArticleEntity, (article) => article.comments)
   public article: ArticleEntity;
-  
+
   @ManyToOne((type) => UserEntity, (user) => user.articles)
   public author: UserEntity;
-
 }
