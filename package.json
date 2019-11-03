@@ -8,6 +8,7 @@
     "start:watch": "nodemon",
     "prestart:prod": "tsc",
     "start:prod": "node dist/main.js",
+    "tslint": "tslint -c tslint.json -p tsconfig.json",
     "test": "jest --config=jest.json",
     "test:watch": "jest --watch --config=jest.json",
     "test:coverage": "jest --config=jest.json --coverage --coverageDirectory=coverage"
@@ -48,13 +49,16 @@
   "devDependencies": {
     "@types/jest": "^23.3.13",
     "@types/node": "^10.12.21",
+    "atob": ">=2.1.0",
+    "deep-extend": ">=0.5.1",
+    "extend": ">=3.0.2",
     "jest": "^24.5.0",
     "nodemon": "^1.18.10",
     "supertest": "^3.0.0",
     "ts-jest": "^24.0.0",
     "ts-node": "^8.0.3",
-    "deep-extend": ">=0.5.1",
-    "extend": ">=3.0.2",
-    "atob": ">=2.1.0"
+    "tslint": "^5.20.0",
+    "tslint-config-standard": "^8.0.1",
+    "tslint-react": "^4.1.0"
   }
 }
