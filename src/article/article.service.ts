@@ -1,14 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, getRepository, DeleteResult } from 'typeorm';
-import { ArticleEntity } from './article.entity';
-import { Comment } from './comment.entity';
-import { UserEntity } from '../user/user.entity';
+import * as slugRequire from 'slug';
+import { DeleteResult, getRepository, Repository } from 'typeorm';
 import { FollowsEntity } from '../profile/follows.entity';
+import { UserEntity } from '../user/user.entity';
+import { ArticleEntity } from './article.entity';
+import { IArticleRO, IArticlesRO, ICommentsRO } from './article.interface';
+import { Comment } from './comment.entity';
 import { CreateArticleDto } from './dto';
-
-import {ArticleRO, ArticlesRO, CommentsRO} from './article.interface';
-const slug = require('slug');
 
 @Injectable()
 export class ArticleService {
@@ -20,30 +19,29 @@ export class ArticleService {
     @InjectRepository(UserEntity)
     private readonly userRepository: Repository<UserEntity>,
     @InjectRepository(FollowsEntity)
-    private readonly followsRepository: Repository<FollowsEntity>
+    private readonly followsRepository: Repository<FollowsEntity>,
   ) {}
 
-  async findAll(query): Promise<ArticlesRO> {
-
-    const qb = await getRepository(ArticleEntity)
+  public async findAll(query): Promise<IArticlesRO> {
+    const qb = getRepository(ArticleEntity)
       .createQueryBuilder('article')
       .leftJoinAndSelect('article.author', 'author');
 
-    qb.where("1 = 1");
+    qb.where('1 = 1');
 
     if ('tag' in query) {
-      qb.andWhere("article.tagList LIKE :tag", { tag: `%${query.tag}%` });
+      qb.andWhere('article.tagList LIKE :tag', { tag: `%${query.tag}%` });
     }
 
     if ('author' in query) {
-      const author = await this.userRepository.findOne({username: query.author});
-      qb.andWhere("article.authorId = :id", { id: author.id });
+      const author = await this.userRepository.findOne({ username: query.author });
+      qb.andWhere('article.authorId = :id', { id: author.id });
     }
 
     if ('favorited' in query) {
-      const author = await this.userRepository.findOne({username: query.favorited});
-      const ids = author.favorites.map(el => el.id);
-      qb.andWhere("article.authorId IN (:ids)", { ids });
+      const author = await this.userRepository.findOne({ username: query.favorited });
+      const ids = author.favorites.map((el) => el.id);
+      qb.andWhere('article.authorId IN (:ids)', { ids });
     }
 
     qb.orderBy('article.created', 'DESC');
@@ -61,14 +59,14 @@ export class ArticleService {
     const articles = await qb.getMany();
     this.protectAuthors(articles);
 
-    return {articles, articlesCount};
+    return { articles, articlesCount };
   }
 
-  async findFeed(userId: number, query): Promise<ArticlesRO> {
-    const _follows = await this.followsRepository.find( {followerId: userId});
-    const ids = _follows.map(el => el.followingId);
+  public async findFeed(userId: number, query): Promise<IArticlesRO> {
+    const follows = await this.followsRepository.find({ followerId: userId });
+    const ids = follows.map((el) => el.followingId);
 
-    const qb = await getRepository(ArticleEntity)
+    const qb = getRepository(ArticleEntity)
       .createQueryBuilder('article')
       .where('article.authorId IN (:ids)', { ids });
 
@@ -87,17 +85,17 @@ export class ArticleService {
     const articles = await qb.getMany();
     this.protectAuthors(articles);
 
-    return {articles, articlesCount};
+    return { articles, articlesCount };
   }
 
-  async findOne(where): Promise<ArticleRO> {
-    const article = await this.articleRepository.findOne({...where, relations: ["author"]});
+  public async findOne(where): Promise<IArticleRO> {
+    const article = await this.articleRepository.findOne({ ...where, relations: ['author'] });
     this.protectAuthor(article);
-    return {article};
+    return { article };
   }
 
-  async addComment(slug: string, commentData): Promise<ArticleRO> {
-    let article = await this.articleRepository.findOne({slug, relations: ["author"]});
+  public async addComment(slug: string, commentData): Promise<IArticleRO> {
+    let article = await this.articleRepository.findOne({ slug, relations: ['author'] });
     this.protectAuthor(article);
 
     const comment = new Comment();
@@ -107,72 +105,67 @@ export class ArticleService {
 
     await this.commentRepository.save(comment);
     article = await this.articleRepository.save(article);
-    return {article}
+    return { article };
   }
 
-  async deleteComment(slug: string, id: string): Promise<ArticleRO> {
-    let article = await this.articleRepository.findOne({slug, relations: ["author"]});
+  public async deleteComment(slug: string, id: string): Promise<IArticleRO> {
+    let article = await this.articleRepository.findOne({ slug, relations: ['author'] });
     this.protectAuthor(article);
 
     const comment = await this.commentRepository.findOne(id);
-    const deleteIndex = article.comments.findIndex(_comment => _comment.id === comment.id);
+    const deleteIndex = article.comments.findIndex((candidate) => candidate.id === comment.id);
 
     if (deleteIndex >= 0) {
       const deleteComments = article.comments.splice(deleteIndex, 1);
       await this.commentRepository.delete(deleteComments[0].id);
-      article =  await this.articleRepository.save(article);
-      return {article};
+      article = await this.articleRepository.save(article);
+      return { article };
     } else {
-      return {article};
+      return { article } ;
     }
-
   }
 
-  async favorite(id: number, slug: string): Promise<ArticleRO> {
-    let article = await this.articleRepository.findOne({slug, relations: ["author"]});
+  public async favorite(id: number, slug: string): Promise<IArticleRO> {
+    let article = await this.articleRepository.findOne({ slug, relations: ['author'] });
     this.protectAuthor(article);
     const user = await this.userRepository.findOne(id);
 
-    const isNewFavorite = user.favorites.findIndex(_article => _article.id === article.id) < 0;
+    const isNewFavorite = user.favorites.findIndex((candidate) => candidate.id === article.id) < 0;
     if (isNewFavorite) {
       user.favorites.push(article);
       article.favoriteCount++;
-
       await this.userRepository.save(user);
       article = await this.articleRepository.save(article);
     }
 
-    return {article};
+    return { article };
   }
 
-  async unFavorite(id: number, slug: string): Promise<ArticleRO> {
-    let article = await this.articleRepository.findOne({slug, relations: ["author"]});
+  public async unFavorite(id: number, slug: string): Promise<IArticleRO> {
+    let article = await this.articleRepository.findOne({ slug, relations: ['author'] });
     this.protectAuthor(article);
     const user = await this.userRepository.findOne(id);
 
-    const deleteIndex = user.favorites.findIndex(_article => _article.id === article.id);
+    const deleteIndex = user.favorites.findIndex((candidate) => candidate.id === article.id);
 
     if (deleteIndex >= 0) {
-
       user.favorites.splice(deleteIndex, 1);
       article.favoriteCount--;
-
       await this.userRepository.save(user);
       article = await this.articleRepository.save(article);
     }
 
-    return {article};
+    return { article };
   }
 
-  async findComments(slug: string): Promise<CommentsRO> {
-    const article = await this.articleRepository.findOne({slug});
+  public async findComments(slug: string): Promise<ICommentsRO> {
+    const article = await this.articleRepository.findOne({ slug, relations: ['comments'] });
     this.protectAuthor(article);
-    return {comments: article.comments};
+    return { comments: article.comments };
   }
 
-  async create(userId: number, articleData: CreateArticleDto): Promise<ArticleEntity> {
-
-    let article = new ArticleEntity();
+  public async create(userId: number, articleData: CreateArticleDto): Promise<ArticleEntity> {
+    const article = new ArticleEntity();
     article.title = articleData.title;
     article.description = articleData.description;
     article.body = articleData.body;
@@ -183,7 +176,7 @@ export class ArticleService {
     const newArticle = await this.articleRepository.save(article);
     this.protectAuthor(newArticle);
 
-    const author = await this.userRepository.findOne({ where: { id: userId }, relations: ["articles"] });
+    const author = await this.userRepository.findOne({ where: { id: userId }, relations: ['articles'] });
 
     if (Array.isArray(author.articles)) {
       author.articles.push(article);
@@ -192,28 +185,26 @@ export class ArticleService {
     }
 
     await this.userRepository.save(author);
-
     return newArticle;
-
   }
 
-  async update(slug: string, articleData: any): Promise<ArticleRO> {
-    let toUpdate = await this.articleRepository.findOne({ slug, relations: ["author"]});
-    let updated = Object.assign(toUpdate, articleData);
+  public async update(slug: string, articleData: any): Promise<IArticleRO> {
+    const toUpdate = await this.articleRepository.findOne({ slug, relations: ['author'] });
+    const updated = { ...toUpdate, articleData };
     const article = await this.articleRepository.save(updated);
     this.protectAuthor(article);
-    return {article};
+    return { article };
   }
 
-  async delete(slug: string): Promise<DeleteResult> {
-    return await this.articleRepository.delete({ slug });
+  public async delete(slug: string): Promise<DeleteResult> {
+    return this.articleRepository.delete({ slug });
   }
 
-  slugify(title: string) {
-    return slug(title, {lower: true}) + '-' + (Math.random() * Math.pow(36, 6) | 0).toString(36)
+  private slugify(title: string) {
+    return slugRequire(title, { lower: true }) + '-' + (Math.random() * Math.pow(36, 6) | 0).toString(36); // tslint:disable-line
   }
 
-  protectAuthor(article:any) {
+  private protectAuthor(article: any) {
     if (article && article.author) {
       if (article.author.password) {
         delete article.author.password;
@@ -224,7 +215,7 @@ export class ArticleService {
     }
   }
 
-  protectAuthors(articles:any[]) {
+  private protectAuthors(articles: any[]) {
     articles.forEach((article) => {
       this.protectAuthor(article);
     });

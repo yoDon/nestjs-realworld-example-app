@@ -1,6 +1,5 @@
 import { TagEntity } from './tag.entity';
 
-export interface TagsRO {
+export interface ITagsRO {
   tags: TagEntity[];
 }
-

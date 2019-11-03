@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToOne, ManyToOne, OneToMany, JoinColumn, AfterUpdate, BeforeUpdate } from 'typeorm';
+import { BeforeUpdate, Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { UserEntity } from '../user/user.entity';
 import { Comment } from './comment.entity';
 
@@ -6,41 +6,41 @@ import { Comment } from './comment.entity';
 export class ArticleEntity {
 
   @PrimaryGeneratedColumn()
-  id: number;
+  public id: number;
 
   @Column()
-  slug: string;
+  public slug: string;
 
   @Column()
-  title: string;
+  public title: string;
 
-  @Column({default: ''})
-  description: string;
+  @Column({ default: '' })
+  public description: string;
 
-  @Column({default: ''})
-  body: string;
+  @Column({ default: '' })
+  public body: string;
 
-  @Column({ type: 'timestamp', default: () => "CURRENT_TIMESTAMP"})
-  created: Date;
+  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  public created: Date;
 
-  @Column({ type: 'timestamp', default: () => "CURRENT_TIMESTAMP"})
-  updated: Date;
-
-  @BeforeUpdate()
-  updateTimestamp() {
-    this.updated = new Date;
-  }
+  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  public updated: Date;
 
   @Column('simple-array')
-  tagList: string[];
+  public tagList: string[];
 
-  @ManyToOne(type => UserEntity, user => user.articles)
-  author: UserEntity;
+  @ManyToOne((type) => UserEntity, (user) => user.articles)
+  public author: UserEntity;
 
-  @OneToMany(type => Comment, comment => comment.article, {eager: true})
+  @OneToMany((type) => Comment, (comment) => comment.article, { eager: true })
   @JoinColumn()
-  comments: Comment[];
+  public comments: Comment[];
 
-  @Column({default: 0})
-  favoriteCount: number;
+  @Column({ default: 0 })
+  public favoriteCount: number;
+
+  @BeforeUpdate()
+  public updateTimestamp() {
+    this.updated = new Date();
+  }
 }

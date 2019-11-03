@@ -1,8 +1,8 @@
 import { Test } from '@nestjs/testing';
+import { TypeOrmModule } from "@nestjs/typeorm";
 import { TagController } from './tag.controller';
+import { TagEntity } from "./tag.entity";
 import { TagService } from './tag.service';
-import {TypeOrmModule} from "@nestjs/typeorm";
-import {TagEntity} from "./tag.entity";
 
 describe('TagController', () => {
   let tagController: TagController;
@@ -22,7 +22,7 @@ describe('TagController', () => {
   describe('findAll', () => {
     it('should return an array of tags', async () => {
       const tags : TagEntity[] = [];
-      const createTag = (id, name) => {
+      const createTag = (id: number, name: string) => {
         const tag = new TagEntity();
         tag.id = id;
         tag.tag = name;

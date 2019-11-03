@@ -1,7 +1,5 @@
-import { HttpException } from '@nestjs/common/exceptions/http.exception';
-import { NestMiddleware, HttpStatus, Injectable } from '@nestjs/common';
-import { ExtractJwt, Strategy } from 'passport-jwt';
-import { Request, Response, NextFunction } from 'express';
+import { HttpException, HttpStatus, Injectable, NestMiddleware } from '@nestjs/common';
+import { NextFunction, Request, Response } from 'express'; // tslint:disable-line
 import * as jwt from 'jsonwebtoken';
 import { SECRET } from '../config';
 import { UserService } from './user.service';
@@ -10,7 +8,7 @@ import { UserService } from './user.service';
 export class AuthMiddleware implements NestMiddleware {
   constructor(private readonly userService: UserService) {}
 
-  async use(req: Request, res: Response, next: NextFunction) {
+  public async use(req: Request, res: Response, next: NextFunction) {
     const authHeaders = req.headers.authorization;
     if (authHeaders && (authHeaders as string).split(' ')[1]) {
       const token = (authHeaders as string).split(' ')[1];

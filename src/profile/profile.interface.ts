@@ -1,10 +1,10 @@
-export interface ProfileData {
+export interface IProfileData {
   username: string;
   bio: string;
   image?: string;
   following?: boolean;
 }
 
-export interface ProfileRO {
-  profile: ProfileData;
+export interface IProfileRO {
+  profile: IProfileData;
 }

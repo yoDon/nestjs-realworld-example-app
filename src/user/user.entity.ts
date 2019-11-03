@@ -1,39 +1,39 @@
-import {Entity, PrimaryGeneratedColumn, Column, BeforeInsert, JoinTable, ManyToMany, OneToMany} from "typeorm";
-import { IsEmail, Validate } from 'class-validator';
+import { IsEmail } from 'class-validator';
 import * as crypto from 'crypto';
+import { BeforeInsert, Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { ArticleEntity } from '../article/article.entity';
 
 @Entity('user')
 export class UserEntity {
 
   @PrimaryGeneratedColumn()
-  id: number;
+  public id: number;
 
   @Column()
-  username: string;
+  public username: string;
 
   @Column()
   @IsEmail()
-  email: string;
+  public email: string;
 
-  @Column({default: ''})
-  bio: string;
+  @Column({ default: '' })
+  public bio: string;
 
-  @Column({default: ''})
-  image: string;
+  @Column({ default: '' })
+  public image: string;
 
   @Column()
-  password: string;
+  public password: string;
+
+  @ManyToMany((type) => ArticleEntity)
+  @JoinTable()
+  public favorites: ArticleEntity[];
+
+  @OneToMany((type) => ArticleEntity, (article) => article.author)
+  public articles: ArticleEntity[];
 
   @BeforeInsert()
-  hashPassword() {
+  public hashPassword() {
     this.password = crypto.createHmac('sha256', this.password).digest('hex');
   }
-
-  @ManyToMany(type => ArticleEntity)
-  @JoinTable()
-  favorites: ArticleEntity[];
-
-  @OneToMany(type => ArticleEntity, article => article.author)
-  articles: ArticleEntity[];
 }

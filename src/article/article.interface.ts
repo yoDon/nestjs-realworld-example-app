@@ -1,19 +1,18 @@
 import { ArticleEntity } from './article.entity';
 
-interface Comment {
+interface IComment {
   body: string;
 }
 
-export interface CommentsRO {
-  comments: Comment[];
+export interface ICommentsRO {
+  comments: IComment[];
 }
 
-export interface ArticleRO {
+export interface IArticleRO {
   article: ArticleEntity;
 }
 
-export interface ArticlesRO {
+export interface IArticlesRO {
   articles: ArticleEntity[];
   articlesCount: number;
 }
-
