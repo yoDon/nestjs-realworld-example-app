@@ -23,7 +23,7 @@ export class ArticleService {
   ) {}
 
   public async findAll(query): Promise<IArticlesRO> {
-    const qb = getRepository(ArticleEntity)
+    const qb = this.articleRepository
       .createQueryBuilder('article')
       .leftJoinAndSelect('article.author', 'author');
 
@@ -66,8 +66,9 @@ export class ArticleService {
     const follows = await this.followsRepository.find({ followerId: userId });
     const ids = follows.map((el) => el.followingId);
 
-    const qb = getRepository(ArticleEntity)
+    const qb = this.articleRepository
       .createQueryBuilder('article')
+      .leftJoinAndSelect('article.author', 'author')
       .where('article.authorId IN (:ids)', { ids });
 
     qb.orderBy('article.created', 'DESC');

@@ -33,7 +33,7 @@ export class UserService {
 
     // check uniqueness of username/email
     const { username, email, password } = dto;
-    const qb = getRepository(UserEntity)
+    const qb = this.userRepository
       .createQueryBuilder('user')
       .where('user.username = :username', { username })
       .orWhere('user.email = :email', { email });
